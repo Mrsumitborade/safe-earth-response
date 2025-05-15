@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { Database, Loader, AlertTriangle, Info } from "lucide-react";
+import { Database, Loader, AlertTriangle, Info, MessageCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -25,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ChatInterface from "@/components/ChatInterface";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -199,9 +199,13 @@ const Dashboard = () => {
             {/* Main Content */}
             <div className="lg:col-span-2">
               <Tabs defaultValue="incidents">
-                <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsList className="grid w-full grid-cols-3 mb-4">
                   <TabsTrigger value="incidents">Reported Incidents</TabsTrigger>
                   <TabsTrigger value="insights">AI Insights</TabsTrigger>
+                  <TabsTrigger value="chat" className="flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4" />
+                    Assistance
+                  </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="incidents" className="mt-0">
@@ -298,6 +302,20 @@ const Dashboard = () => {
                           ))}
                         </div>
                       )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="chat" className="mt-0">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle>AI Disaster Assistance</CardTitle>
+                      <CardDescription>
+                        Get real-time assistance and guidance during disaster situations
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[500px]">
+                      <ChatInterface />
                     </CardContent>
                   </Card>
                 </TabsContent>
