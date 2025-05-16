@@ -12,7 +12,7 @@ type Message = {
 };
 
 // OpenAI API key
-const OPENAI_API_KEY = "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";
+const OPENAI_API_KEY = "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";
 
 const ChatInterface = () => {
   const [message, setMessage] = useState("");
