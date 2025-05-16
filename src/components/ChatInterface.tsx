@@ -11,9 +11,6 @@ type Message = {
   content: string;
 };
 
-// OpenAI API key
-const OPENAI_API_KEY = "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";
-
 const ChatInterface = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
@@ -42,7 +39,7 @@ const ChatInterface = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer pst-FQjD2JgzDuAGSB9Kg5ygZe9RxGLmI0ZcNRcNPKkme4oNQPs`, // Using a different format API key
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
@@ -67,8 +64,17 @@ const ChatInterface = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Something went wrong. Please try again."
+        description: "We're having trouble connecting to our AI assistant. Please try again later."
       });
+      
+      // Add a fallback response so users aren't left hanging
+      setMessages(prev => [
+        ...prev,
+        { 
+          role: "assistant", 
+          content: "I apologize, but I'm having trouble processing your request right now. In an emergency situation, please contact local emergency services immediately. For non-emergency assistance, please try again in a few moments or refer to your local disaster management resources." 
+        }
+      ]);
     } finally {
       setIsLoading(false);
     }
