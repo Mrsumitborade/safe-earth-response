@@ -3,16 +3,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageCircle, Send, Loader } from "lucide-react";
+import { MessageCircle, Send, Loader, Key } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 type Message = {
   role: "user" | "assistant" | "system";
   content: string;
 };
 
-// Standard OpenAI API key (not project-style key)
-const OPENAI_API_KEY = "sk-9GX-_8DqYaB8teMucN9QMlIjxLCHGpClcBfMr1GTcjXALfxtJNnYlOo0dcFGEh6MBEgTJ8cOr0T3BlbkFJXJ6srzFb07YMLxcQx6lHpJdLcL-_APwLYcR8i7E3OMRpQPuLM1Yiajfm0OlldQn_dQpguaE20A";
+const OPENAI_API_KEY_STORAGE_KEY = "openai_api_key";
 
 const ChatInterface = () => {
   const [message, setMessage] = useState("");
@@ -27,11 +27,58 @@ const ChatInterface = () => {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Try to load the API key from localStorage on component mount
+    const savedApiKey = localStorage.getItem(OPENAI_API_KEY_STORAGE_KEY);
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    } else {
+      // If no key is found, show the input form
+      setShowApiKeyInput(true);
+    }
+  }, []);
+
+  const saveApiKey = () => {
+    if (apiKey.trim()) {
+      localStorage.setItem(OPENAI_API_KEY_STORAGE_KEY, apiKey.trim());
+      setShowApiKeyInput(false);
+      toast({
+        title: "API Key Saved",
+        description: "Your OpenAI API key has been saved for this session."
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter a valid OpenAI API key."
+      });
+    }
+  };
+
+  const resetApiKey = () => {
+    localStorage.removeItem(OPENAI_API_KEY_STORAGE_KEY);
+    setApiKey("");
+    setShowApiKeyInput(true);
+  };
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
     
+    // Check if API key is available
+    if (!apiKey) {
+      setShowApiKeyInput(true);
+      toast({
+        variant: "destructive",
+        title: "API Key Required",
+        description: "Please enter your OpenAI API key to use the chat assistant."
+      });
+      return;
+    }
+
     const userMessage = { role: "user" as const, content: message };
     setMessages(prev => [...prev, userMessage]);
     setMessage("");
@@ -42,7 +89,7 @@ const ChatInterface = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",
@@ -64,11 +111,22 @@ const ChatInterface = () => {
       ]);
     } catch (error: any) {
       console.error("Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "We're having trouble connecting to our AI assistant. Please try again later."
-      });
+      
+      // Check for API key related errors
+      if (error.message && error.message.includes("API key")) {
+        toast({
+          variant: "destructive",
+          title: "API Key Error",
+          description: "Your OpenAI API key appears to be invalid. Please check and update your key."
+        });
+        resetApiKey();
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "We're having trouble connecting to our AI assistant. Please try again later."
+        });
+      }
       
       // Add a fallback response so users aren't left hanging
       setMessages(prev => [
@@ -94,10 +152,43 @@ const ChatInterface = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  if (showApiKeyInput) {
+    return (
+      <div className="flex flex-col h-full">
+        <Alert className="mb-4">
+          <Key className="h-4 w-4" />
+          <AlertTitle>OpenAI API Key Required</AlertTitle>
+          <AlertDescription>
+            To use the Disaster Assistance Chat, you need to provide your own OpenAI API key. 
+            Your key will be stored locally in your browser for this session only.
+          </AlertDescription>
+        </Alert>
+        
+        <div className="flex flex-col gap-4">
+          <Input
+            type="password"
+            placeholder="Enter your OpenAI API key (starts with sk-...)"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+          />
+          <Button onClick={saveApiKey}>Save API Key</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Disaster Assistance Chat</h3>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={resetApiKey}
+          className="flex items-center gap-1"
+        >
+          <Key className="h-3 w-3" /> Change API Key
+        </Button>
       </div>
       
       <div className="flex-1 overflow-y-auto mb-4 space-y-4 max-h-[400px] pr-2">
