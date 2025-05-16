@@ -11,6 +11,9 @@ type Message = {
   content: string;
 };
 
+// OpenAI API key
+const OPENAI_API_KEY = "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";
+
 const ChatInterface = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
@@ -39,7 +42,7 @@ const ChatInterface = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer pst-FQjD2JgzDuAGSB9Kg5ygZe9RxGLmI0ZcNRcNPKkme4oNQPs`, // Using a different format API key
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
