@@ -11,8 +11,8 @@ type Message = {
   content: string;
 };
 
-// OpenAI API key
-const OPENAI_API_KEY = "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";
+// Standard OpenAI API key (not project-style key)
+const OPENAI_API_KEY = "sk-9GX-_8DqYaB8teMucN9QMlIjxLCHGpClcBfMr1GTcjXALfxtJNnYlOo0dcFGEh6MBEgTJ8cOr0T3BlbkFJXJ6srzFb07YMLxcQx6lHpJdLcL-_APwLYcR8i7E3OMRpQPuLM1Yiajfm0OlldQn_dQpguaE20A";
 
 const ChatInterface = () => {
   const [message, setMessage] = useState("");
@@ -45,7 +45,7 @@ const ChatInterface = () => {
           Authorization: `Bearer ${OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
+          model: "gpt-3.5-turbo",
           messages: [...messages, userMessage],
           temperature: 0.3,
           max_tokens: 500,
